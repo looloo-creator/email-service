@@ -7,7 +7,7 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true }), MailModule, AuthModule],
-  providers:[AppService],
-  controllers:[AppController]
+  providers: [AppService],
+  controllers: [AppController],
 })
 export class AppModule {}
