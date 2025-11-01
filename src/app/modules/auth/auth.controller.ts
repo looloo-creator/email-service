@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { SendVerificationRequestDto } from './dto';
+import { SendVerificationRequestDto, SendVerificationResponseDto } from './dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -15,6 +15,10 @@ export class AuthController {
   })
   @ApiBody({
     type: SendVerificationRequestDto,
+  })
+  @ApiOkResponse({
+    description: 'Verification email successfully sent',
+    type: SendVerificationResponseDto,
   })
   async sendVerification(@Body() body: SendVerificationRequestDto) {
     const sendMailRequest = await this.authService.formSendmailRequest(body);
