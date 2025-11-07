@@ -28,8 +28,7 @@ export class AuthService {
       throw new HttpException('User not found', 404);
     }
     if (user.is_email_verified) {
-      console.log('101');
-      throw new HttpException('Account already verified', 400);
+      throw new HttpException('Account already verified', 409);
     }
 
     const { username, email_token: token } = user;
