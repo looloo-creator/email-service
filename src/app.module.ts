@@ -4,15 +4,15 @@ import { MailModule } from './_shared/mail/mail.module';
 import { AuthModule } from './app/modules/auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MysqlModule } from './_shared/mysql/mysql.module';
 import { LoggerModule } from './_shared/logger/logger.module';
+import { PostgresModule } from './_shared/postgres/postgres.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MailModule,
     AuthModule,
-    MysqlModule,
+    PostgresModule,
     LoggerModule,
   ],
   providers: [AppService],
