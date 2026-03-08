@@ -4,12 +4,28 @@ import { AppModule } from './app.module';
 import { LoggerService, ValidationPipe } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import morgan from 'morgan';
-import { LoggerExceptionsFilter } from './_shared/logger/logger-exceptions.filter'; // ✅ add this
+import { LoggerExceptionsFilter } from './_shared/logger/logger-exceptions.filter';
+import { ConfigService } from '@nestjs/config';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+
+function parseKafkaBrokers(value: string | undefined): string[] {
+  if (!value) {
+    return ['localhost:9092'];
+  }
+
+  const brokers = value
+    .split(',')
+    .map((broker) => broker.trim())
+    .filter(Boolean);
+
+  return brokers.length > 0 ? brokers : ['localhost:9092'];
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const logger = app.get<LoggerService>(WINSTON_MODULE_NEST_PROVIDER);
+  const configService = app.get(ConfigService);
 
   const winstonStream: morgan.StreamOptions = {
     write: (message: string) => {
@@ -19,7 +35,6 @@ async function bootstrap() {
   app.use(morgan('combined', { stream: winstonStream }));
   app.useLogger(logger);
 
-  // ✅ Global error filter
   app.useGlobalFilters(new LoggerExceptionsFilter(logger));
 
   const config = new DocumentBuilder()
@@ -37,7 +52,33 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
-  logger.log(`🚀 Server started on port ${process.env.PORT || 3000}`);
+  const kafkaBrokers = parseKafkaBrokers(
+    configService.get<string>('KAFKA_BROKERS'),
+  );
+  const kafkaClientId =
+    configService.get<string>('KAFKA_CLIENT_ID') ?? 'email-service';
+  const kafkaGroupId =
+    configService.get<string>('KAFKA_GROUP_ID') ?? 'email-service-consumer';
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        clientId: kafkaClientId,
+        brokers: kafkaBrokers,
+      },
+      consumer: {
+        groupId: kafkaGroupId,
+      },
+    },
+  });
+  await app.startAllMicroservices();
+  logger.log(
+    `Kafka consumer started for brokers: ${kafkaBrokers.join(', ')} (group: ${kafkaGroupId})`,
+  );
+
+  const port = Number(configService.get<string>('PORT')) || 3000;
+  await app.listen(port);
+  logger.log(`Server started on port ${port}`);
 }
 void bootstrap();

@@ -1,5 +1,22 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
+export enum EmailVerificationStatus {
+  NotVerified = 0,
+  Verified = 1,
+}
+
+export enum UserStatus {
+  VerificationPending = 1,
+  Active = 2,
+  Blocked = 3,
+  DeactivatedByUser = 4,
+}
+
+export enum UserActiveState {
+  Deleted = 0,
+  Active = 1,
+}
+
 @Table({
   tableName: 'users', // set exact table name if needed
   timestamps: false, // since your original model had timestamps: false
@@ -32,10 +49,12 @@ export class User extends Model<User> {
   password: string;
 
   @Column({
-    type: DataType.BOOLEAN,
-    allowNull: true,
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: EmailVerificationStatus.NotVerified,
+    comment: '0-Not verified, 1-verified',
   })
-  is_email_verified: boolean;
+  is_email_verified: EmailVerificationStatus;
 
   @Column({
     type: DataType.DATE,
@@ -57,9 +76,11 @@ export class User extends Model<User> {
 
   @Column({
     type: DataType.INTEGER,
-    allowNull: true,
+    allowNull: false,
+    defaultValue: UserStatus.VerificationPending,
+    comment: '1-Verification Pending, 2-Active, 3-Blocked, 4-Deactivated By User',
   })
-  status: number;
+  status: UserStatus;
 
   @Column({
     type: DataType.DATE,
@@ -68,8 +89,28 @@ export class User extends Model<User> {
   last_login: Date;
 
   @Column({
-    type: DataType.BOOLEAN,
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: UserActiveState.Active,
+    comment: '0-Deleted, 1-Active',
+  })
+  is_active: UserActiveState;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: false,
+  })
+  created_at: Date;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: false,
+  })
+  updated_at: Date;
+
+  @Column({
+    type: DataType.DATE,
     allowNull: true,
   })
-  is_active: boolean;
+  deleted_at: Date | null;
 }

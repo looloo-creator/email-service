@@ -6,10 +6,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from './_shared/logger/logger.module';
 import { PostgresModule } from './_shared/postgres/postgres.module';
+import { validateEnv } from './config/env.validation';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     MailModule,
     AuthModule,
     PostgresModule,

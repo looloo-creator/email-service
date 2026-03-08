@@ -57,6 +57,29 @@ $ pnpm run test:e2e
 $ pnpm run test:cov
 ```
 
+## Database migrations
+
+```bash
+# run pending migrations (local/dev)
+$ pnpm run migrate:up
+
+# show migration status
+$ pnpm run migrate:status
+
+# rollback last applied migration
+$ pnpm run migrate:down
+
+# rollback all applied migrations
+$ pnpm run migrate:down:all
+
+# run pending migrations after build (prod image/runtime)
+$ pnpm run build
+$ pnpm run migrate:up:prod
+```
+
+Migrations are in `src/database/migrations` and execution history is stored in
+`schema_migrations`.
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

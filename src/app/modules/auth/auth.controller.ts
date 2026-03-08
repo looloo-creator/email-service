@@ -21,7 +21,6 @@ export class AuthController {
     type: SendVerificationResponseDto,
   })
   async sendVerification(@Body() body: SendVerificationRequestDto) {
-    const sendMailRequest = await this.authService.formSendmailRequest(body);
-    return await this.authService.sendVerificationEmail(sendMailRequest);
+    return this.authService.sendVerification(body);
   }
 }
